@@ -52,7 +52,7 @@ class Current {
   final String lastUpdated;
   final double tempC;
   final double tempF;
-  final int isDay;
+   int isDay;
   final Condition condition;
   final double windMph;
   final double windKph;

@@ -1,8 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:pr_5_sky_scrapper/provider/provider.dart';
 import 'package:pr_5_sky_scrapper/view/home_screen/home_screen.dart';
+import 'package:provider/provider.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(MultiProvider(
+    providers: [
+      ChangeNotifierProvider(create: (context) => WeatherProvider(),)
+    ],
+      child: const MyApp()));
+
 }
 
 class MyApp extends StatelessWidget {
@@ -16,7 +23,9 @@ class MyApp extends StatelessWidget {
       initialRoute: "home",
       routes: {
         //"/" :(context) => slashscreen();
-        "home":(context) => home_screen(),
+        "home":(context) => WeatherScreen(),
+        // "home":(context) => home_screen(),
+        //"serach":(context) => WeatherScreen(),
       },
     );
   }
