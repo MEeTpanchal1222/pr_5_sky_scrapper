@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pr_5_sky_scrapper/provider/provider.dart';
 import 'package:pr_5_sky_scrapper/view/home_screen/home_screen.dart';
+import 'package:pr_5_sky_scrapper/view/slash_screen/slash_screen.dart';
 import 'package:provider/provider.dart';
 
 void main() {
@@ -20,10 +21,10 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      initialRoute: "home",
+      initialRoute: "/home",
       routes: {
-        "/" :(context) => SplashScreen();
-        "home":(context) => HomeScreen(),
+        "/" :(context) => SplashScreen(weatherProvider: WeatherProvider(),),
+        "/home":(context) => HomeScreen(),
         // "home":(context) => home_screen(),
         //"serach":(context) => WeatherScreen(),
       },
