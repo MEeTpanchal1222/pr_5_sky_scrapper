@@ -1,25 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
-import '../../modal/main_modal.dart';
 import '../../provider/provider.dart';
 
-class WeatherScreen extends StatefulWidget {
-  @override
-  _WeatherScreenState createState() => _WeatherScreenState();
-}
-
-class _WeatherScreenState extends State<WeatherScreen> {
-  TextEditingController _searchController = TextEditingController();
-  late WeatherProvider _weatherProvider;
-
-  @override
-  void initState() {
-    super.initState();
-    _weatherProvider = Provider.of<WeatherProvider>(context, listen: false);
-    _weatherProvider.fetchWeather("surat");
-  }
-
+class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -28,224 +11,155 @@ class _WeatherScreenState extends State<WeatherScreen> {
         actions: [
           IconButton(
             icon: Icon(Icons.search),
-            onPressed: () async {
-              String? selectedLocation = await showSearch<String>(
-                context: context,
-                delegate: WeatherSearchDelegate(_weatherProvider),
-              );
-              if (selectedLocation != null && selectedLocation.isNotEmpty) {
-                // Handle selection if needed
-              }
-            },
-          ),
-          IconButton(
-            icon: Icon(Icons.settings),
             onPressed: () {
-              // Implement settings functionality
+              showSearch(
+                context: context,
+                delegate: WeatherSearchDelegate(),
+              );
             },
           ),
         ],
       ),
       body: Consumer<WeatherProvider>(
         builder: (context, weatherProvider, child) {
-          if (weatherProvider.isLoading) {
+          if (weatherProvider.weather == null) {
             return Center(child: CircularProgressIndicator());
-          } else if (weatherProvider.weatherResponse != null) {
-            final weather = weatherProvider.weatherResponse!;
-            return Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Container(
-                    height: 50,
-                    width: 150,
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 20),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Image.asset("assets/loction_logo.png", height: 25,),
-                          Text(" ${weather.location.region}, ${weather.location.country} ", style: TextStyle(fontSize: 21),)
-                        ],
-                      ),
-                    ),
-                    decoration: ShapeDecoration(
-                      color: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      shadows: [
-                        BoxShadow(
-                          color: Color(0x0F000000),
-                          blurRadius: 24,
-                          offset: Offset(0, 12),
-                          spreadRadius: 0,
-                        )
-                      ],
-                    ),
-                  ),
-                  Card(
-                    elevation: 4.0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10.0),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Current Weather',
-                            style: TextStyle(
-                              fontSize: 20.0,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          SizedBox(height: 10.0),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Today',
-                                    style: TextStyle(
-                                      fontSize: 16.0,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  Text(
-                                    '${weather.current.condition.text}',
-                                    style: TextStyle(fontSize: 16.0),
-                                  ),
-                                ],
-                              ),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [
-                                  Text(
-                                    '${weather.current.tempC}°C',
-                                    style: TextStyle(
-                                      fontSize: 24.0,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  Text(
-                                    'Feels like ${weather.current.feelslikeC}°C',
-                                    style: TextStyle(fontSize: 16.0),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 10.0),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Column(
-                                children: [
-                                  //Image.network('${weather.current.condition.icon}', height: 20, width: 30,),
-                                  Text('${weather.current.condition.text}'),
-                                ],
-                              ),
-                              Column(
-                                children: [
-                                  Icon(Icons.water_drop),
-                                  Text('Humidity: ${weather.current.humidity}%'),
-                                ],
-                              ),
-                              Column(
-                                children: [
-                                  Icon(Icons.wb_sunny),
-                                  Text('UV Index: ${weather.current.uv}'),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 20.0),
-                  Text(
-                    'Hourly Forecast',
-                    style: TextStyle(
-                      fontSize: 20.0,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  SizedBox(height: 10.0),
-                  Container(
-                    height: 120.0,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: 12, // Replace with actual hourly forecast count
-                      itemBuilder: (context, index) => Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Column(
-                          children: [
-                            Text('${index + 1} PM'),
-                            Icon(Icons.cloud),
-                            Text('${weather.current.tempC}°C'),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 20.0),
-                  Text(
-                    'Daily Forecast',
-                    style: TextStyle(
-                      fontSize: 20.0,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  SizedBox(height: 10.0),
-                  Expanded(
-                    child: ListView.builder(
-                      itemCount: 5, // Replace with actual daily forecast count
-                      itemBuilder: (context, index) => Card(
-                        child: ListTile(
-                          leading: Icon(Icons.calendar_today),
-                          title: Text('Day ${index + 1}'),
-                          subtitle: Text('Max: ${weather.current.tempC}°C / Min: ${weather.current.tempC}°C'),
-                          trailing: Icon(Icons.keyboard_arrow_right),
-                          onTap: () {
-                            // Navigate to detailed forecast page
-                          },
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            );
-          } else {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.error, size: 40,),
-                  SizedBox(height: 30,),
-                  Text('Failed to load weather data'),
-                ],
-              ),
-            );
           }
+
+          return ListView(
+            padding: EdgeInsets.all(16.0),
+            children: [
+              _buildLocationInfo(weatherProvider),
+              SizedBox(height: 16.0),
+              _buildCurrentWeather(weatherProvider),
+              SizedBox(height: 16.0),
+              _buildHourlyForecast(weatherProvider),
+              SizedBox(height: 16.0),
+              _buildDailyForecast(weatherProvider),
+            ],
+          );
         },
+      ),
+    );
+  }
+
+  Widget _buildLocationInfo(WeatherProvider weatherProvider) {
+    var location = weatherProvider.weather!.locationModal;
+    return Card(
+      child: ListTile(
+        title: Text('${location.name}, ${location.region}'),
+        subtitle: Text('${location.country} | Local Time: ${location.localtime}'),
+      ),
+    );
+  }
+
+  Widget _buildCurrentWeather(WeatherProvider weatherProvider) {
+    var current = weatherProvider.weather!.currentModal;
+    return Card(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ListTile(
+            title: Text('Current Weather'),
+            subtitle: Text('${current.conditionModel.text}'),
+            trailing: Image.network('https:${current.conditionModel.icon}'),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  children: [
+                    Text('Temp'),
+                    Text('${current.tempC} °C'),
+                  ],
+                ),
+                Column(
+                  children: [
+                    Text('Feels Like'),
+                    Text('${current.feelsLikeC} °C'),
+                  ],
+                ),
+                Column(
+                  children: [
+                    Text('Humidity'),
+                    Text('${current.humidity} %'),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHourlyForecast(WeatherProvider weatherProvider) {
+    var hourly = weatherProvider.weather!.weatherForecast.forecastday.first.hour;
+    return Card(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ListTile(
+            title: Text('Hourly Forecast'),
+          ),
+          Container(
+            height: 100.0,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: hourly.length,
+              itemBuilder: (context, index) {
+                var hour = hourly[index];
+                return Container(
+                  width: 80.0,
+                  child: Column(
+                    children: [
+                      Text('${hour.time.split(' ')[1]}'),
+                      Image.network('https:${hour.condition.icon}'),
+                      Text('${hour.tempC} °C'),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDailyForecast(WeatherProvider weatherProvider) {
+    var daily = weatherProvider.weather!.weatherForecast.forecastday;
+    return Card(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ListTile(
+            title: Text('7-Day Forecast'),
+          ),
+          Column(
+            children: daily.map((day) {
+              return ListTile(
+                title: Text('${day.date}'),
+                leading: Image.network('https:${day.day.condition.icon}'),
+                subtitle: Text('${day.day.condition.text}'),
+                trailing: Column(
+                  children: [
+                    Text('Max: ${day.day.maxtempC} °C'),
+                    Text('Min: ${day.day.mintempC} °C'),
+                  ],
+                ),
+              );
+            }).toList(),
+          ),
+        ],
       ),
     );
   }
 }
 
-
-class WeatherSearchDelegate extends SearchDelegate<String> {
-  final WeatherProvider weatherProvider;
-
-  WeatherSearchDelegate(this.weatherProvider);
-
+class WeatherSearchDelegate extends SearchDelegate {
   @override
   List<Widget> buildActions(BuildContext context) {
     return [
@@ -263,91 +177,37 @@ class WeatherSearchDelegate extends SearchDelegate<String> {
     return IconButton(
       icon: Icon(Icons.arrow_back),
       onPressed: () {
-        close(context, '');
+        close(context, null);
       },
     );
   }
 
   @override
   Widget buildResults(BuildContext context) {
-    return FutureBuilder(
-      future: weatherProvider.fetchWeather(query),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator());
-        } else if (snapshot.hasError) {
-          return Center(child: Text('Error: ${snapshot.error}'));
-        } else {
-          // Show search results based on fetched data
-          return buildWeatherResults(context, weatherProvider.weatherResponse!);
-        }
-      },
-    );
+    final weatherProvider = Provider.of<WeatherProvider>(context, listen: false);
+    weatherProvider.fetchData();
+    close(context, null);
+    return Container();
   }
 
   @override
   Widget buildSuggestions(BuildContext context) {
-    return FutureBuilder(
-      future: weatherProvider.getSuggestions(query),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator());
-        } else if (snapshot.hasError) {
-          return Center(child: Text('Error: ${snapshot.error}'));
-        } else {
-          List<String> suggestions = snapshot.data as List<String>;
-          return ListView.builder(
-            itemCount: suggestions.length,
-            itemBuilder: (context, index) {
-              return ListTile(
-                title: Text(suggestions[index]),
-                onTap: () {
-                  query = suggestions[index];
-                  showResults(context);
-                },
-              );
-            },
-          );
-        }
+    final weatherProvider = Provider.of<WeatherProvider>(context);
+    final suggestions = weatherProvider.list
+        .where((location) => location.name.toLowerCase().startsWith(query.toLowerCase()))
+        .toList();
+
+    return ListView.builder(
+      itemCount: suggestions.length,
+      itemBuilder: (context, index) {
+        return ListTile(
+          title: Text(suggestions[index].name),
+          onTap: () {
+            query = suggestions[index].name;
+            showResults(context);
+          },
+        );
       },
-    );
-  }
-
-
-  Widget buildWeatherResults(BuildContext context, WeatherResponse weather) {
-    return ListView(
-      children: [
-        ListTile(
-          title: Text('Current Weather for ${weather.location.name}'),
-          subtitle: Text('Temperature: ${weather.current.tempC}°C'),
-        ),
-        ListTile(
-          title: Text('Condition'),
-          subtitle: Text('${weather.current.condition.text}'),
-          leading: Image.network(
-            weather.current.condition.icon,
-            width: 50,
-            height: 50,
-          ),
-        ),
-        ListTile(
-          title: Text('Feels Like'),
-          subtitle: Text('${weather.current.feelslikeC}°C'),
-        ),
-        ListTile(
-          title: Text('Wind'),
-          subtitle: Text(
-              '${weather.current.windKph} km/h ${weather.current.windDir}'),
-        ),
-        ListTile(
-          title: Text('Humidity'),
-          subtitle: Text('${weather.current.humidity}%'),
-        ),
-        ListTile(
-          title: Text('UV Index'),
-          subtitle: Text('${weather.current.uv}'),
-        ),
-      ],
     );
   }
 }

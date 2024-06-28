@@ -1,48 +1,63 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+
 import '../modal/main_modal.dart';
-
-class WeatherProvider with ChangeNotifier {
-  WeatherResponse? _weatherResponse;
-  bool _isLoading = true;
-
-  WeatherResponse? get weatherResponse => _weatherResponse;
-  bool get isLoading => _isLoading;
-
-  Future<void> fetchWeather(String query) async {
-     const String apiKey = 'fc7289896b1d4aa3be053134242506';
-     const String baseUrl = 'https://api.weatherapi.com/v1/current.json';
+import '../modal/serachmodal.dart';
+import 'helper/api_serivese.dart';
 
 
-      final response = await http.get(Uri.parse('$baseUrl?key=$apiKey&q=$query'));
+class WeatherProvider extends ChangeNotifier {
+  Weather? weather;
+  DateTime dateTime = DateTime.now();
+  String name ='surat';
+  String? isClicked;
+  TextEditingController textEditingController = TextEditingController(text: 'surat');
+  List<Location> list = [];
 
-      if (response.statusCode == 200) {
-        _weatherResponse = WeatherResponse.fromJson(jsonDecode(response.body));
-      } else {
-        throw Exception('Failed to load weather data');
-      }
-     _isLoading = false;
-     notifyListeners();
-    }
-  Future<List<String>> getSuggestions(String query) async {
-    const String apiKey = 'fc7289896b1d4aa3be053134242506';
-    const String baseUrl = 'https://api.weatherapi.com/v1/current.json';
-    try {
-      final response = await http.get(Uri.parse('$baseUrl?key=$apiKey&q=$query'));
-      if (response.statusCode == 200) {
-        List<String> suggestions = [];
-        var data = jsonDecode(response.body);
-        for (var item in data) {
-          suggestions.add(item['name']);
-        }
-        return suggestions;
-      } else {
-        throw Exception('Failed to load suggestions');
-      }
-    } catch (e) {
-      throw Exception('Failed to fetch suggestions: $e');
-    }
-  }
+  WeatherProvider() {
+    getData();
+    fetchData();
   }
 
+  Future<void> fetchData() async {
+    ApiSarvice apiService = ApiSarvice();
+    String? jsonData = await apiService.getData(isClicked ?? name);
+    if (jsonData != null) {
+      Map dataList = jsonDecode(jsonData);
+      weather = Weather.getData(dataList);
+      print(jsonData);
+      notifyListeners();
+      searchApi('surat');
+    }
+  }
+
+  Future<void> searchApi(String name) async {
+    ApiSarvice apiService = ApiSarvice();
+    String? jsonData = await apiService.getSreachData(name);
+    if (jsonData != null) {
+      List dataList = jsonDecode(jsonData);
+      list = dataList.map((e) => Location.fromJson(e)).toList();
+      this.name = name;
+      notifyListeners();
+      print(list);
+    }
+  }
+
+  void changeToController(String value) {
+    textEditingController.text = value;
+    notifyListeners();
+  }
+
+  Future<void> setData() async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    preferences.setString('isClicked', '');
+    notifyListeners();
+  }
+
+  Future<void> getData() async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    isClicked = preferences.getString('isClicked');
+    notifyListeners();
+  }
+}

@@ -22,11 +22,12 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       initialRoute: "home",
       routes: {
-        //"/" :(context) => slashscreen();
-        "home":(context) => WeatherScreen(),
+        "/" :(context) => SplashScreen();
+        "home":(context) => HomeScreen(),
         // "home":(context) => home_screen(),
         //"serach":(context) => WeatherScreen(),
       },
+
     );
   }
 }
